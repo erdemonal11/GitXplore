@@ -104,37 +104,27 @@ const App: React.FC = () => {
       return;
     }
     const fetchedData = await fetchGitHubData(url);
-    fetchedData
-      ? setData(fetchedData)
-      : setError("Failed to fetch data from GitHub.");
+    fetchedData ? setData(fetchedData) : setError("Failed to fetch data from GitHub.");
   };
 
   return (
-    <div
-      className={`min-h-screen flex flex-col items-center transition-colors duration-300 ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
-      }`}
-    >
+    <div className={`min-h-screen flex flex-col items-center transition-colors duration-300 ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"}`}>
       <header className="w-full max-w-2xl p-6 flex flex-col items-center">
-        <h1 className="text-4xl font-bold mb-4 tracking-wide">
-          GitHub Card Generator
+        <h1 className="text-5xl font-extrabold mb-8 tracking-wide text-center">
+          GitCard
         </h1>
 
-        <div className="flex items-center gap-3 mb-4 w-full max-w-md">
+        <div className="flex flex-col items-center gap-4 w-full max-w-md">
           <input
             type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Enter GitHub Profile or Repo URL"
-            className={`p-3 w-full rounded-lg border focus:outline-none transition duration-300 ${
-              isDarkMode
-                ? "bg-gray-800 text-white placeholder-gray-400 border-gray-700 focus:border-indigo-500"
-                : "bg-white text-gray-900 placeholder-gray-500 border-gray-300 focus:border-indigo-600"
-            }`}
+            className={`p-3 w-full rounded-lg border focus:outline-none transition duration-300 ${isDarkMode ? "bg-gray-800 text-white placeholder-gray-400 border-gray-700 focus:border-indigo-500" : "bg-white text-gray-900 placeholder-gray-500 border-gray-300 focus:border-indigo-600"}`}
           />
           <button
             onClick={handleFetch}
-            className="px-4 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-500 transition duration-300"
+            className="w-full px-4 py-3 bg-black text-white rounded-lg shadow-md hover:bg-gray-800 transition duration-300 font-semibold text-lg"
           >
             Generate
           </button>
@@ -142,7 +132,7 @@ const App: React.FC = () => {
 
         <button
           onClick={() => setIsDarkMode(!isDarkMode)}
-          className="mt-4 px-4 py-2 text-sm font-semibold rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition duration-300"
+          className="mt-6 px-4 py-2 text-sm font-semibold rounded-lg bg-gray-100 text-gray-900 hover:bg-gray-200 transition duration-300"
         >
           Toggle {isDarkMode ? "Light" : "Dark"} Mode
         </button>
@@ -153,11 +143,8 @@ const App: React.FC = () => {
           <>
             <Card data={data} theme={selectedTheme} />
 
-            <div className="mt-6">
-              <label
-                htmlFor="theme-select"
-                className="block text-sm font-medium mb-2"
-              >
+            <div className="mt-8">
+              <label htmlFor="theme-select" className="block text-sm font-medium mb-2">
                 Select Card Theme
               </label>
               <select
@@ -179,7 +166,7 @@ const App: React.FC = () => {
             </div>
           </>
         ) : (
-          <p className="text-gray-500">
+          <p className="text-gray-500 text-lg">
             Enter a GitHub URL and click Generate to see the card.
           </p>
         )}
