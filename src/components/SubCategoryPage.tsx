@@ -52,7 +52,11 @@ export default function SubCategoryPage({
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
-      <Navbar darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
+      <Navbar 
+  darkMode={darkMode} 
+  toggleDarkMode={() => setDarkMode(!darkMode)} 
+  onOpenCategoryMenu={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)} 
+/>
       <div className="flex flex-1">
         <CategoryMenu 
           isOpen={isCategoryMenuOpen} 

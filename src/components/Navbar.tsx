@@ -1,10 +1,17 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Github, Sun, Moon, ArrowLeft } from 'lucide-react';
+import { Github, Sun, Moon, ArrowLeft, Menu } from 'lucide-react';
 
-const Navbar: React.FC<{ darkMode: boolean; toggleDarkMode: () => void }> = ({
+interface NavbarProps {
+  darkMode: boolean;
+  toggleDarkMode: () => void;
+  onOpenCategoryMenu: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({
   darkMode,
   toggleDarkMode,
+  onOpenCategoryMenu,
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -14,6 +21,13 @@ const Navbar: React.FC<{ darkMode: boolean; toggleDarkMode: () => void }> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
+            <button
+              onClick={onOpenCategoryMenu}
+              className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 dark:hover:bg-gray-700 mr-2"
+              aria-label="Open category menu"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
             <Link to="/" className="flex-shrink-0 flex items-center">
               <Github className="h-8 w-8 text-gray-900 dark:text-white mr-2" />
               <span className="text-2xl font-bold">
