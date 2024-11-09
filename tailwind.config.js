@@ -1,21 +1,20 @@
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        darkBg: '#0e0e10',
-        lightBg: '#f5f5f5',
-        darkCard: '#1f1f23',
-        lightCard: '#ffffff',
-        accent: '#0070f3',
-        textDark: '#eaeaea',
-        textLight: '#333333',
-      },
-      fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        vercel: {
+          pink: '#FF0080',
+          blue: '#0070F3',
+          cyan: '#50E3C2',
+          orange: '#F5A623',
+          violet: '#7928CA',
+        },
       },
     },
   },
-  darkMode: 'class',
+  plugins: [],
 };

@@ -1,87 +1,137 @@
 import React, { useEffect, useState } from 'react';
 import { fetchTrendingRepos } from '../services/githubApi';
 import RepoList from '../components/RepoList';
-import Header from '../components/Header';
+import Navbar from '../components/Navbar';
+import CategoryMenu from '../components/CategoryMenu';
 import Loader from '../components/Loader';
+import Pagination from '../components/Pagination';
+import Footer from '../components/Footer';
 import { Repo } from '../types/repo';
+import { Search } from 'lucide-react';
 
-const Home: React.FC<{ darkMode: boolean; setDarkMode: (mode: boolean) => void }> = ({
+interface HomeProps {
+  darkMode: boolean;
+  setDarkMode: React.Dispatch<React.SetStateAction<boolean>>;
+  isCategoryMenuOpen: boolean;
+  setIsCategoryMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export default function Home({
   darkMode,
   setDarkMode,
-}) => {
+  isCategoryMenuOpen,
+  setIsCategoryMenuOpen
+}: HomeProps) {
   const [repos, setRepos] = useState<Repo[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [language, setLanguage] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [favorites, setFavorites] = useState<Repo[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
+    loadRepos();
+    loadFavorites();
+  }, [currentPage]);
+
+  const loadRepos = async () => {
     setLoading(true);
-    fetchTrendingRepos(language, page).then((data) => {
-      setRepos(data);
+    try {
+      const { repos, totalCount } = await fetchTrendingRepos('', currentPage);
+      setRepos(repos);
+      setTotalPages(Math.ceil(totalCount / 12));
+    } catch (error) {
+      console.error('Error loading repositories:', error);
+    } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    if (query.length > 2) {
+      setSearching(true);
+      try {
+        const { repos, totalCount } = await fetchTrendingRepos(query, 1);
+        setRepos(repos);
+        setTotalPages(Math.ceil(totalCount / 12));
+        setCurrentPage(1);
+      } catch (error) {
+        console.error('Error searching repositories:', error);
+      } finally {
+        setSearching(false);
+      }
+    } else if (query.length === 0) {
+      loadRepos();
+    }
+  };
+
+  const loadFavorites = () => {
+    const savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]') as Repo[];
+    setFavorites(savedFavorites);
+  };
+
+  const toggleFavorite = (repo: Repo) => {
+    setFavorites(prevFavorites => {
+      const newFavorites = prevFavorites.some((fav) => fav.id === repo.id)
+        ? prevFavorites.filter((fav) => fav.id !== repo.id)
+        : [...prevFavorites, repo];
+      localStorage.setItem('favorites', JSON.stringify(newFavorites));
+      return newFavorites;
     });
-  }, [language, page]);
+  };
 
   return (
-    <div className={darkMode ? 'dark' : ''}>
-      <Header darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
-      <main className="p-8 bg-lightBg dark:bg-darkBg min-h-screen text-gray-900 dark:text-gray-100 transition-all">
-        
-        {/* Introduction Section */}
-        <section className="mb-8">
-          <h2 className="text-3xl font-bold mb-4">🌟 GitHub Trending Repositories</h2>
-          <p className="text-lg mb-4">
-            Discover the most popular repositories on GitHub right now! These trending repositories are sorted based on their stars and are updated daily to bring you the hottest projects in the open-source community. Filter repositories by language to find exactly what you're interested in.
-          </p>
-        </section>
-
-        {/* Language Filter */}
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold">Filter by Language</h3>
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="p-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded"
-          >
-            <option value="">All Languages</option>
-            <option value="javascript">JavaScript</option>
-            <option value="typescript">TypeScript</option>
-            <option value="python">Python</option>
-            <option value="go">Go</option>
-            <option value="rust">Rust</option>
-            <option value="java">Java</option>
-            <option value="csharp">C#</option>
-            <option value="php">PHP</option>
-            <option value="ruby">Ruby</option>
-            <option value="swift">Swift</option>
-            <option value="kotlin">Kotlin</option>
-            <option value="html">HTML</option>
-            <option value="css">CSS</option>
-          </select>
-        </div>
-
-        {loading ? <Loader /> : <RepoList repos={repos} />}
-        
-        {/* Pagination */}
-        <div className="flex justify-center mt-8 space-x-4">
-          <button
-            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-            disabled={page === 1}
-            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="text-lg">Page {page}</span>
-          <button
-            onClick={() => setPage((prev) => prev + 1)}
-            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded hover:bg-gray-300 dark:hover:bg-gray-600"
-          >
-            Next
-          </button>
-        </div>
-      </main>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      <Navbar darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
+      <div className="flex flex-1">
+        <CategoryMenu 
+          isOpen={isCategoryMenuOpen} 
+          onToggle={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)} 
+        />
+        <main className={`flex-1 transition-all duration-200 ${isCategoryMenuOpen ? 'ml-80' : 'ml-0'}`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+            <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-8">Trending Repositories</h1>
+            
+            <div className="relative mb-8">
+              <input
+                type="text"
+                placeholder="Search repositories..."
+                className="w-full p-4 pl-12 pr-4 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                onChange={(e) => handleSearch(e.target.value)}
+                value={searchQuery}
+              />
+              <Search className="absolute left-4 top-4 text-gray-400" size={20} />
+              {searching && (
+                <div className="absolute right-4 top-4">
+                  <Loader size={20} />
+                </div>
+              )}
+            </div>
+            
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader size={40} />
+              </div>
+            ) : (
+              <>
+                <RepoList
+                  repos={repos}
+                  favorites={favorites}
+                  onToggleFavorite={toggleFavorite}
+                />
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </>
+            )}
+          </div>
+        </main>
+      </div>
+      <Footer />
     </div>
   );
-};
-
-export default Home;
+}

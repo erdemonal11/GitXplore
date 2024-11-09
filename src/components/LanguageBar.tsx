@@ -1,58 +1,48 @@
-import React from 'react';
-
-interface LanguageBarProps {
-  languages: { [key: string]: number };
+interface Language {
+  name: string;
+  percentage: number;
+  color: string;
 }
 
-const LanguageBar: React.FC<LanguageBarProps> = ({ languages }) => {
-  const totalBytes = Object.values(languages).reduce((sum, bytes) => sum + bytes, 0);
+interface LanguageBarProps {
+  languages: Language[];
+}
 
-  if (totalBytes === 0) {
-    return <p className="text-gray-500 mt-4">Languages: N/A</p>;
-  }
-
-  const languagePercentages = Object.entries(languages).map(([lang, bytes]) => ({
-    lang,
-    percentage: (bytes / totalBytes) * 100,
-    color: getLanguageColor(lang),
-  }));
+export default function LanguageBar({ languages }: LanguageBarProps) {
+  const total = languages.reduce((sum, lang) => sum + lang.percentage, 0);
 
   return (
-    <div className="mt-4">
-      <div className="flex h-3 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-        {languagePercentages.map(({ lang, percentage, color }) => (
+    <div className="space-y-2">
+      {/* Progress bar */}
+      <div className="flex h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
+        {languages.map((language) => (
           <div
-            key={lang}
-            style={{ width: `${percentage}%`, backgroundColor: color }}
-            title={`${lang}: ${percentage.toFixed(1)}%`}
+            key={language.name}
+            style={{
+              width: `${(language.percentage / total) * 100}%`,
+              backgroundColor: language.color,
+            }}
+            className="first:rounded-l-full last:rounded-r-full"
+            title={`${language.name}: ${((language.percentage / total) * 100).toFixed(1)}%`}
           />
         ))}
       </div>
-      <div className="mt-2 flex flex-wrap text-sm">
-        {languagePercentages.map(({ lang, percentage, color }) => (
-          <div key={lang} className="flex items-center mr-4">
-            <span className="w-3 h-3 inline-block rounded-full mr-2" style={{ backgroundColor: color }}></span>
-            {lang}: {percentage.toFixed(1)}%
+
+      {/* Language details */}
+      <div className="flex flex-wrap gap-3 text-xs">
+        {languages.map((language) => (
+          <div key={language.name} className="flex items-center gap-1.5">
+            <span
+              className="h-3 w-3 rounded-full"
+              style={{ backgroundColor: language.color }}
+            />
+            <span className="text-gray-600 dark:text-gray-400">{language.name}</span>
+            <span className="text-gray-500 dark:text-gray-500">
+              {((language.percentage / total) * 100).toFixed(1)}%
+            </span>
           </div>
         ))}
       </div>
     </div>
   );
-};
-
-const getLanguageColor = (language: string) => {
-  const colors: { [key: string]: string } = {
-    JavaScript: '#f1e05a',
-    TypeScript: '#2b7489',
-    Python: '#3572A5',
-    HTML: '#e34c26',
-    CSS: '#563d7c',
-    Go: '#00ADD8',
-    Rust: '#dea584',
-    Shell: '#89e051',
-    Java: '#b07219',
-  };
-  return colors[language] || '#cccccc';
-};
-
-export default LanguageBar;
+}

@@ -1,25 +1,41 @@
 import React, { useEffect, useState } from 'react';
-import { Repo } from '../types/repo';
 import RepoList from '../components/RepoList';
+import Navbar from '../components/Navbar';
+import { Repo } from '../types/repo';
 
-const Favorites: React.FC = () => {
+const Favorites: React.FC<{ darkMode: boolean; setDarkMode: (mode: boolean) => void }> = ({
+  darkMode,
+  setDarkMode,
+}) => {
   const [favorites, setFavorites] = useState<Repo[]>([]);
 
-  // Load bookmarks from localStorage on component mount
   useEffect(() => {
-    const savedRepos = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+    const savedRepos = JSON.parse(localStorage.getItem('favorites') || '[]');
     setFavorites(savedRepos);
   }, []);
 
+  const toggleFavorite = (repo: Repo) => {
+    const newFavorites = favorites.filter((fav) => fav.id !== repo.id);
+    setFavorites(newFavorites);
+    localStorage.setItem('favorites', JSON.stringify(newFavorites));
+  };
+
   return (
-    <main className="p-8 bg-lightBg dark:bg-darkBg min-h-screen text-gray-900 dark:text-gray-100">
-      <h2 className="text-3xl font-bold mb-8">⭐ Favorite Repositories</h2>
-      {favorites.length > 0 ? (
-        <RepoList repos={favorites} />
-      ) : (
-        <p>No favorites yet! Bookmark some repositories from the Trending page.</p>
-      )}
-    </main>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navbar darkMode={darkMode} toggleDarkMode={() => setDarkMode(!darkMode)} />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+          ⭐ Favorite Repositories
+        </h1>
+        {favorites.length > 0 ? (
+          <RepoList repos={favorites} favorites={favorites} onToggleFavorite={toggleFavorite} />
+        ) : (
+          <p className="text-gray-600 dark:text-gray-400">
+            No favorites yet! Bookmark some repositories from the Trending page.
+          </p>
+        )}
+      </main>
+    </div>
   );
 };
 
